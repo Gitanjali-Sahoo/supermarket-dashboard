@@ -1,93 +1,133 @@
 import express from "express";
 import db from "../db/connection.js";
+import { adminOnly } from "../middleware/authMiddleware.js"; // optional
 
 const router = express.Router();
 
-// -------------------- GET ALL SALES --------------------
+// =======================
+// Get weekly sales for all stores (summary)
+// =======================
 router.get("/", (req, res) => {
-  try {
-    const rows = db.prepare("SELECT * FROM sales").all();
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------- TOTAL REVENUE --------------------
-router.get("/revenue", (req, res) => {
-  try {
-    const row = db
-      .prepare(
-        `
-      SELECT SUM(total_sales) AS revenue
-      FROM sales
+  const rows = db
+    .prepare(
+      `
+      SELECT s.name AS store_name,
+             SUM(w.dairy) AS dairy_total,
+             SUM(w.bakery) AS bakery_total,
+             SUM(w.produce) AS produce_total,
+             SUM(w.meat) AS meat_total,
+             SUM(w.total) AS total_sales
+      FROM weekly_sales w
+      JOIN supermarkets s ON s.id = w.store_id
+      GROUP BY w.store_id
     `
-      )
-      .get();
+    )
+    .all();
 
-    res.json(row);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json(rows);
 });
 
-// -------------------- REVENUE BY STORE --------------------
-router.get("/revenue/store", (req, res) => {
+router.get("/daily-sale", (req, res) => {
   try {
     const rows = db
-      .prepare(
-        `
-      SELECT store, SUM(total_sales) AS revenue
-      FROM sales
-      GROUP BY store
-    `
-      )
-      .all();
-
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------- DAILY REVENUE --------------------
-router.get("/revenue/daily", (req, res) => {
-  try {
-    const rows = db
-      .prepare(
-        `
-      SELECT date, SUM(total_sales) AS revenue
-      FROM sales
-      GROUP BY date
-    `
-      )
-      .all();
-
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// -------------------- CATEGORY BREAKDOWN --------------------
-router.get("/categories", (req, res) => {
-  try {
-    const row = db
       .prepare(
         `
       SELECT
-        SUM(fruits) AS fruits,
-        SUM(dairy) AS dairy,
-        SUM(snacks) AS snacks,
-        SUM(household) AS household
-      FROM sales
+        day,
+        s.name AS store_name,
+        dairy,
+        bakery,
+        produce,
+        meat
+      FROM weekly_sales w
+      JOIN supermarkets s ON s.id = w.store_id
+      ORDER BY
+        CASE day
+          WHEN 'Mon' THEN 1
+          WHEN 'Tue' THEN 2
+          WHEN 'Wed' THEN 3
+          WHEN 'Thu' THEN 4
+          WHEN 'Fri' THEN 5
+          WHEN 'Sat' THEN 6
+          WHEN 'Sun' THEN 7
+        END,
+        store_name
     `
       )
-      .get();
+      .all();
 
-    res.json(row);
+    // Optional: group by day for easier frontend consumption
+    const groupedByDay = rows.reduce((acc, curr) => {
+      if (!acc[curr.day]) acc[curr.day] = {};
+      acc[curr.day][curr.store_name] = {
+        Dairy: curr.dairy,
+        Bakery: curr.bakery,
+        Produce: curr.produce,
+        Meat: curr.meat,
+      };
+      return acc;
+    }, {});
+
+    // Convert to array of { day, ICA, Lidl, Willys, Coop }
+    const result = Object.entries(groupedByDay).map(([day, stores]) => ({
+      day,
+      ICA: stores.ICA || { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 },
+      Lidl: stores.Lidl || { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 },
+      Willys: stores.Willys || { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 },
+      Coop: stores.Coop || { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 },
+    }));
+
+    res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch daily sales" });
+  }
+});
+// =======================
+// Get weekly sales for a single store
+// =======================
+router.get("/:storeId", (req, res) => {
+  const { storeId } = req.params;
+
+  const rows = db
+    .prepare(
+      `
+      SELECT day, dairy, bakery, produce, meat, total
+      FROM weekly_sales
+      WHERE store_id = ?
+      ORDER BY
+        CASE day
+          WHEN 'Mon' THEN 1
+          WHEN 'Tue' THEN 2
+          WHEN 'Wed' THEN 3
+          WHEN 'Thu' THEN 4
+          WHEN 'Fri' THEN 5
+          WHEN 'Sat' THEN 6
+          WHEN 'Sun' THEN 7
+        END
+    `
+    )
+    .all(storeId);
+
+  res.json(rows);
+});
+
+// =======================
+// Optional: Admin-only route for adding sales
+// =======================
+router.post("/add", adminOnly, (req, res) => {
+  const { store_id, day, dairy, bakery, produce, meat, total } = req.body;
+
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO weekly_sales (store_id, day, dairy, bakery, produce, meat, total)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(store_id, day, dairy, bakery, produce, meat, total);
+
+    res.json({ message: "Weekly sales added" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
