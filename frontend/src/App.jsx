@@ -7,11 +7,11 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import { useContext } from "react";
 
-const ProtectedRoute = ({ children }) => {
-  const { user } = useContext(GlobalContext);
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-};
+// const ProtectedRoute = ({ children }) => {
+//   const { user } = useContext(GlobalContext);
+//   if (!user) return <Navigate to="/login" replace />;
+//   return children;
+// };
 
 export default function App() {
   return (
@@ -24,9 +24,10 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+            <Dashboard />
+            // <ProtectedRoute>
+
+            // </ProtectedRoute>
           }
         />
       </Routes>

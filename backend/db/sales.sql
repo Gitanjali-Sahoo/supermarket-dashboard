@@ -7,8 +7,11 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('admin','user'))
+    role TEXT NOT NULL CHECK(role IN ('admin','manager')),
+    supermarket_id INTEGER,
+    FOREIGN KEY (supermarket_id) REFERENCES supermarkets(id)
 );
+
 
 -- ============================
 -- 2. SUPERMARKETS TABLE

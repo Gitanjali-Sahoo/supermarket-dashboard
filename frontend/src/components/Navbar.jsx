@@ -24,10 +24,6 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6 text-lg">
-          <Link to="/" className="hover:text-blue-500 transition">
-            Home
-          </Link>
-
           {user && (
             <Link to="/dashboard" className="hover:text-blue-500 transition">
               Dashboard
@@ -37,15 +33,15 @@ export default function Navbar() {
           {/* Theme Button */}
           <button
             onClick={toggleTheme}
-            className="px-3 py-2 rounded-lg transition bg-gray-200 dark:bg-gray-700"
+            className="px-3 py-2 rounded-lg transition "
           >
-            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+            {theme === "light" ? "🌙 " : "☀️ "}
           </button>
 
           {/* Auth Section */}
           {user ? (
             <>
-              <span className="font-semibold">Hi, {user.name}</span>
+              <span className="font-semibold">{user.name}</span>
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
