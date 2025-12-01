@@ -3,8 +3,8 @@
 export default function SalesTable({ data, itemKeys, visibleItems }) {
   return (
     <div className="mb-6 overflow-auto rounded-xl shadow-md bg-white dark:bg-gray-800 p-4">
-      <h3 className="text-xl font-semibold mb-4">Daily Sales</h3>
-      <table className="w-full text-left border-collapse">
+      <h3 className="text-xl font-bold mb-4">Daily Sales</h3>
+      <table className="w-full text-left border-collapse text-xs">
         <thead>
           <tr>
             <th className="border-b px-3 py-2">Day</th>

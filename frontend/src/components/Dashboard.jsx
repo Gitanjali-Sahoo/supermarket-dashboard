@@ -11,9 +11,9 @@ import ConsolidatedCharts from "./ConsolidatedCharts";
 const itemKeys = ["Dairy", "Bakery", "Produce", "Meat"];
 const COLORS = {
   Dairy: "#3b82f6",
-  Bakery: "#a855f7",
+  Bakery: "#af2d8c",
   Produce: "#f97316",
-  Meat: "#22c55e",
+  Meat: "#30c522",
 };
 
 export default function Dashboard() {
@@ -101,7 +101,7 @@ export default function Dashboard() {
           : "bg-gray-100 text-gray-900"
       }`}
     >
-      <h1 className="text-3xl font-bold mb-6">Sales Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
       {/* Store Selector & Toggle */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:gap-4">
@@ -111,7 +111,7 @@ export default function Dashboard() {
             <select
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
-              className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               disabled={isManager || showConsolidated}
             >
               {storeList.map((s) => (

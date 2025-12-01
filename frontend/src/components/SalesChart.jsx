@@ -30,10 +30,25 @@ export default function SalesChart({
 
   const formatYAxis = (v) => `${(v / 1000).toFixed(0)}k`;
 
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || !payload.length) return null;
+
+    return (
+      <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-3 rounded-lg shadow-lg border dark:border-gray-700">
+        <p className="font-semibold mb-1">{label}</p>
+        {payload.map((item, index) => (
+          <p key={index} className="text-sm" style={{ color: item.color }}>
+            {item.name}: {item.value}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 rounded-xl shadow-md bg-white dark:bg-gray-800 w-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">
+        <h3 className="text-xl font-bold">
           {chartType === "line" ? "Line Trend" : "Bar Comparison"} –{" "}
           {selectedStore}
         </h3>
@@ -67,7 +82,7 @@ export default function SalesChart({
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="day" />
             <YAxis tickFormatter={formatYAxis} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             {itemKeys.map(
               (k) =>
@@ -88,7 +103,7 @@ export default function SalesChart({
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="day" />
             <YAxis tickFormatter={formatYAxis} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             {itemKeys.map(
               (k) =>

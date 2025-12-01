@@ -34,8 +34,8 @@ export default function Login() {
       }
 
       setUser(data);
-      setMessage(`Welcome, ${data.name}!`);
-      setTimeout(() => navigate("/dashboard"), 1000);
+      setMessage(`Successfully logged in, ${data.name}!`);
+      setTimeout(() => navigate("/"), 1000);
     } catch (err) {
       setError("Something went wrong.");
     }
@@ -60,7 +60,7 @@ export default function Login() {
       >
         <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
 
-        {message && <p className="text-green-500 mb-3">{message}</p>}
+        {/* {message && <p className="text-green-500 mb-3 center">{message}</p>} */}
         {error && <p className="text-red-500 mb-3">{error}</p>}
 
         {/* Login Form */}

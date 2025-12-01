@@ -81,8 +81,10 @@ router.post("/login", (req, res) => {
   res.json({
     id: user.id,
     name: user.name,
+    email: user.email,
     role: user.role,
     supermarket_id: user.supermarket_id,
+    supermarket_name: supermarket ? supermarket.name : null,
   });
 });
 

@@ -10,7 +10,7 @@ import {
 export default function WeeklyPieChart({ pieData, totalPie, COLORS }) {
   return (
     <div className="p-4 rounded-xl shadow-md bg-white dark:bg-gray-800 w-full">
-      <h3 className="text-xl font-semibold mb-4">Weekly Totals</h3>
+      <h3 className="text-xl font-bold mb-4">Weekly Totals</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Legend />
