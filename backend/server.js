@@ -14,7 +14,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/supermarkets", supermarketsRoutes);
 app.use("/api/sales", salesRoutes);
-app.use("/api/stock", stockRoutes);
+app.use("/api/stocks", stockRoutes);
 
 // Start server
 app.listen(PORT, () => {

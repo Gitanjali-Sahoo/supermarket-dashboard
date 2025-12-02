@@ -1,37 +1,3 @@
-// import express from "express";
-// import db from "../db/connection.js"; // your SQLite connection
-
-// const router = express.Router();
-
-// // Register user
-// router.post("/register", (req, res) => {
-//   const { name, email, password, role } = req.body;
-//   try {
-//     const stmt = db.prepare(
-//       "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)"
-//     );
-//     stmt.run(name, email, password, role || "user");
-//     res.json({ message: "User registered" });
-//   } catch (err) {
-//     res.status(400).json({ error: "Email already exists" });
-//   }
-// });
-
-// // Login user
-// router.post("/login", (req, res) => {
-//   const { email, password } = req.body;
-//   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
-//   const user = stmt.get(email);
-
-//   if (!user || user.password_hash !== password) {
-//     return res.status(401).json({ error: "Invalid credentials" });
-//   }
-
-//   res.json({ id: user.id, name: user.name, role: user.role });
-// });
-
-// export default router;
-
 import express from "express";
 import db from "../db/connection.js";
 
@@ -76,6 +42,15 @@ router.post("/login", (req, res) => {
   if (!user || user.password_hash !== password) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
+  let supermarketName = null;
+
+  if (user.supermarket_id) {
+    const store = db
+      .prepare("SELECT name FROM supermarkets WHERE id = ?")
+      .get(user.supermarket_id);
+
+    supermarketName = store ? store.name : null;
+  }
 
   // store in session later — for now return
   res.json({
@@ -84,7 +59,7 @@ router.post("/login", (req, res) => {
     email: user.email,
     role: user.role,
     supermarket_id: user.supermarket_id,
-    supermarket_name: supermarket ? supermarket.name : null,
+    supermarket_name: supermarketName,
   });
 });
 

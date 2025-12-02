@@ -4,7 +4,6 @@ export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  console.log(user);
 
   // On app load, restore user from localStorage
   useEffect(() => {

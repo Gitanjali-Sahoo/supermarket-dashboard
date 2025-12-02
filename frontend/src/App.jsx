@@ -5,6 +5,9 @@ import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import ProfileDetail from "./components/ProfileDetail";
+import ContactUs from "./components/ContactUs";
+import Footer from "./components/Footer";
+import AboutUs from "./components/AboutUs";
 
 export default function App() {
   return (
@@ -16,7 +19,10 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<ProfileDetail />} />
-      </Routes>
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/about" element={<AboutUs />} />
+      </Routes>{" "}
+      <Footer />
     </BrowserRouter>
   );
 }

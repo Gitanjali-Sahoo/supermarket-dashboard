@@ -7,6 +7,7 @@ export default function Navbar() {
   const { user, logout } = useContext(GlobalContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,19 +16,19 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full shadow-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 transition-all">
-      <div className="max-w-7xl mx-auto px-6 py-3  flex justify-between items-center">
+    <nav className="w-full shadow-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ">
+      <div className=" mx-auto px-6 py-3  flex justify-between items-center">
         {/* LOGO */}
         <Link to="/" className="text-2xl font-bold tracking-wide">
           SuperMarket
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-4 text-sm">
-          <Link to="/#" className="hover:text-blue-500 transition">
+        <div className="hidden md:flex items-center gap-6 text-sm">
+          <Link to="/about" className="hover:text-blue-500 transition">
             About
           </Link>
-          <Link to="/#" className="hover:text-blue-500 transition">
+          <Link to="/contact" className="hover:text-blue-500 transition">
             Contact Us
           </Link>
           {user && (
@@ -46,7 +47,7 @@ export default function Navbar() {
             <>
               <div className="relative">
                 <button
-                  onClick={() => setOpen(!open)}
+                  onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2  py-2 rounded-xl transition"
                 >
                   <img
@@ -69,7 +70,7 @@ export default function Navbar() {
                     strokeWidth={2}
                     stroke="grey"
                     className={`w-4 h-4 ml-1 transition-transform ${
-                      open ? "rotate-180" : "rotate-0"
+                      profileOpen ? "rotate-180" : "rotate-0"
                     }`}
                   >
                     <path
@@ -81,7 +82,7 @@ export default function Navbar() {
                 </button>
 
                 {/* DROPDOWN MENU */}
-                {open && (
+                {profileOpen && (
                   <div className="absolute right-0 mt-2 w-44 bg-gray-800 shadow-lg rounded-xl py-2 border border-gray-700 z-50 animate-fadeIn">
                     <Link
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 w-full text-left"
@@ -158,14 +159,14 @@ export default function Navbar() {
             {theme === "light" ? "🌙 " : "☀️ "}
           </button>
           <Link
-            to="/#"
+            to="/about"
             className="block text-sm"
             onClick={() => setOpen(false)}
           >
             About Us
           </Link>
           <Link
-            to="/#"
+            to="/contact"
             className="block text-sm"
             onClick={() => setOpen(false)}
           >
