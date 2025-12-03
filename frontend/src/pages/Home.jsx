@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../context/GlobalContext";
 import Stocks from "../components/Stocks";
+import SalesKPIs from "../components/SalesKpi";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ export default function Home() {
           </div>
         </section>
         <Stocks />
+        <SalesKPIs />
       </main>
     </div>
   );
