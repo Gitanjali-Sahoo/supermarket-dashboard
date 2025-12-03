@@ -10,18 +10,20 @@ router.use(authMiddleware);
 router.get("/", (req, res) => {
   const user = req.user;
 
-  let query = `
-    SELECT s.name AS store, st.*
-    FROM stock_levels st
-    JOIN supermarkets s ON s.id = st.store_id
-  `;
+  const baseQuery = `
+  SELECT s.name AS store, st.*
+  FROM stock_levels st
+  JOIN supermarkets s ON s.id = st.store_id
+`;
 
   let rows;
+
   if (user.role === "admin") {
-    rows = db.prepare(query).all(); // admin sees all stores
+    rows = db.prepare(baseQuery).all();
   } else if (user.role === "manager") {
-    query += " WHERE st.store_id = ?";
-    rows = db.prepare(query).all(user.store_id); // manager sees only their store
+    rows = db
+      .prepare(baseQuery + " WHERE st.store_id = ?")
+      .all(user.supermarket_id);
   } else {
     return res.status(403).json({ message: "Unauthorized" });
   }

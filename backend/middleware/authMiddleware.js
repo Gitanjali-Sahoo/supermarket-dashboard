@@ -4,7 +4,7 @@ import db from "../db/connection.js";
 // // Middleware to get user from x-user-id header
 export const authMiddleware = (req, res, next) => {
   const userId = req.headers["x-user-id"];
-  console.log(userId);
+
   if (!userId)
     return res.status(401).json({ error: "Unauthorized: No user ID" });
 
@@ -13,6 +13,7 @@ export const authMiddleware = (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized: User not found" });
 
   req.user = user; // attach user to request
+
   next();
 };
 // Simple admin check

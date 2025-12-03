@@ -43,7 +43,7 @@ export default function ProfileDetail() {
             {
               label: "Supermarket",
               icon: "S",
-              value: user.supermarket_name ?? "—",
+              value: user.supermarket_name ?? "Coop, Willys, Ika & Lidl",
             },
           ].map((item, index) => (
             <div
