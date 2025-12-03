@@ -122,10 +122,10 @@ export default function ContactUs() {
         >
           <h2 className="text-2xl font-bold mb-4">Our Headquarters</h2>
           <p className={darkMode ? "text-gray-300" : "text-gray-900"}>
-            Hertig Carls Väg 25B
+            Stockholm Södra
           </p>
           <p className={darkMode ? "text-gray-300" : "text-gray-900"}>
-            151 38 Södertälje, Sweden
+            12345, Stockholm, Sweden
           </p>
           <p className={darkMode ? "text-gray-300" : "text-gray-900"}>
             Email: support@supermarket.com
