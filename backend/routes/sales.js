@@ -1,22 +1,14 @@
 import express from "express";
 import db from "../db/connection.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // ============================
 // Middleware to attach user
 // ============================
-router.use((req, res, next) => {
-  const userId = req.headers["x-user-id"]; // Frontend should send logged-in user ID
-  if (!userId) return res.status(401).json({ error: "No user ID provided" });
 
-  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
-  if (!user) return res.status(401).json({ error: "User not found" });
-
-  req.user = user;
-  next();
-});
-
+router.use(authMiddleware);
 // =======================
 // Get weekly sales summary
 // =======================
@@ -127,6 +119,84 @@ router.get("/daily-sale", (req, res) => {
   });
 
   res.json(Object.keys(result).map((day) => ({ day, ...result[day] })));
+});
+
+// =======================
+// Get top performing store & product
+// =======================
+router.get("/top-store", (req, res) => {
+  const user = req.user; // set by auth middleware
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    // Fetch all weekly sales
+    const rows = db
+      .prepare(
+        `
+      SELECT w.*, s.name AS store_name
+      FROM weekly_sales w
+      JOIN supermarkets s ON s.id = w.store_id
+    `
+      )
+      .all();
+
+    if (!rows || rows.length === 0)
+      return res.json({ topStore: "N/A", topProduct: "N/A", bestDay: "N/A" });
+
+    // Calculate total sales per store and per product
+    const storeTotals = {};
+    const productTotals = {};
+
+    rows.forEach((row) => {
+      const store = row.store_name;
+      if (!storeTotals[store]) storeTotals[store] = 0;
+      if (!productTotals[store])
+        productTotals[store] = { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 };
+
+      ["dairy", "bakery", "produce", "meat"].forEach((k) => {
+        storeTotals[store] += row[k];
+        productTotals[store][k] += row[k];
+      });
+    });
+
+    // Determine top store
+    let topStore = null;
+    let maxSales = -1;
+    for (const store in storeTotals) {
+      if (storeTotals[store] > maxSales) {
+        maxSales = storeTotals[store];
+        topStore = store;
+      }
+    }
+
+    // Determine top product for top store
+    let topProduct = null;
+    let maxProductSales = -1;
+    for (const [product, value] of Object.entries(productTotals[topStore])) {
+      if (value > maxProductSales) {
+        maxProductSales = value;
+        topProduct = product;
+      }
+    }
+
+    // Determine best day for top store
+    let bestDay = "N/A";
+    let bestDayTotal = -1;
+    rows
+      .filter((r) => r.store_name === topStore)
+      .forEach((r) => {
+        const total = r.dairy + r.bakery + r.produce + r.meat;
+        if (total > bestDayTotal) {
+          bestDayTotal = total;
+          bestDay = r.day;
+        }
+      });
+
+    res.json({ topStore, topProduct, bestDay });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch top store" });
+  }
 });
 
 // =======================

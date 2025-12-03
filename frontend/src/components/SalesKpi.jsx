@@ -1,84 +1,154 @@
-import { useState, useEffect, useContext } from "react";
+import { useMemo, useEffect, useState, useContext } from "react";
 import { GlobalContext } from "../context/GlobalContext";
 
-export default function SalesKPIs() {
+export default function SalesKpi({
+  salesData = [],
+  tableData = [],
+  selectedStore = "",
+  setSelectedStore = () => {},
+  storeList = [],
+  itemKeys = [],
+  COLORS = {},
+}) {
   const { user } = useContext(GlobalContext);
-  const [salesData, setSalesData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // ==========================
+  // TOTAL WEEKLY SALES (for selected store)
+  // ==========================
+  const totalWeeklySales = useMemo(() => {
+    if (!Array.isArray(tableData) || tableData.length === 0) return 0;
+    return tableData.reduce((sum, row) => sum + (row.Total || 0), 0);
+  }, [tableData]);
+
+  // ==========================
+  // DAILY AVERAGE
+  // ==========================
+  const dailyAvg = tableData.length > 0 ? (totalWeeklySales / 7).toFixed(2) : 0;
+
+  // ==========================
+  // BEST DAY (for selected store)
+  // ==========================
+  const bestDay =
+    Array.isArray(tableData) && tableData.length > 0
+      ? tableData.reduce((a, b) => (a.Total > b.Total ? a : b)).day
+      : "N/A";
+
+  // ==========================
+  // BEST PERFORMING STORE (backend)
+  // ==========================
+  const [topStoreData, setTopStoreData] = useState({
+    topStore: "N/A",
+    topProduct: "N/A",
+    bestDay: "N/A",
+  });
 
   useEffect(() => {
-    const fetchSales = async () => {
-      if (!user?.id) return;
-      setLoading(true);
+    const fetchTopStore = async () => {
       try {
-        const res = await fetch("/api/sales", {
+        const res = await fetch("/api/sales/top-store", {
           headers: { "x-user-id": user.id },
         });
         const data = await res.json();
-        setSalesData(data);
+
+        setTopStoreData({
+          topStore: data.topStore || "N/A",
+          topProduct: data.topProduct || "N/A",
+          bestDay: data.bestDay || "N/A",
+        });
       } catch (err) {
-        console.error("Failed to fetch sales:", err);
+        console.error("Failed to fetch top store:", err);
       }
-      setLoading(false);
     };
+    fetchTopStore();
+  }, []);
 
-    fetchSales();
-  }, [user]);
+  const { topStore, topProduct, bestDay: bestStoreDay } = topStoreData;
 
-  if (loading) return <p>Loading KPIs...</p>;
-  if (salesData.length === 0) return <p>No sales data available</p>;
+  // ==========================
+  // BEST CATEGORY FOR SELECTED STORE
+  // ==========================
+  const topStoreCategory = useMemo(() => {
+    if (!selectedStore || salesData.length === 0) return "N/A";
 
-  // ===== Compute KPIs =====
-  const totalWeeklySales = salesData.reduce(
-    (sum, store) => sum + store.total_sales,
-    0
-  );
+    const categoryTotals = {};
+    itemKeys.forEach((k) => (categoryTotals[k] = 0));
 
-  // Top performing store
-  const topStore =
-    salesData.length > 0
-      ? salesData.reduce((a, b) => (a.total_sales > b.total_sales ? a : b))
-          .store_name
-      : "N/A";
+    salesData.forEach((day) => {
+      const storeDayData = day[selectedStore] || {};
+      itemKeys.forEach((k) => {
+        categoryTotals[k] += storeDayData[k] || 0;
+      });
+    });
 
-  // Best category
-  const categoryTotals = salesData.reduce(
-    (acc, store) => {
-      acc.Dairy += store.dairy_total;
-      acc.Bakery += store.bakery_total;
-      acc.Produce += store.produce_total;
-      acc.Meat += store.meat_total;
-      return acc;
-    },
-    { Dairy: 0, Bakery: 0, Produce: 0, Meat: 0 }
-  );
+    let maxSales = -1;
+    let bestCategory = "N/A";
+    for (const k in categoryTotals) {
+      if (categoryTotals[k] > maxSales) {
+        maxSales = categoryTotals[k];
+        bestCategory = k;
+      }
+    }
 
-  const bestCategory = Object.keys(categoryTotals).reduce((a, b) =>
-    categoryTotals[a] > categoryTotals[b] ? a : b
-  );
+    return bestCategory;
+  }, [salesData, selectedStore, itemKeys]);
 
-  // Daily average (for manager or admin)
-  const dailyAverage = (totalWeeklySales / 7).toFixed(2);
-
-  // ===== Render =====
+  // ==========================
+  // RENDER
+  // ==========================
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
-        <p className="text-gray-500 dark:text-gray-300">Total Weekly Sales</p>
-        <p className="text-2xl font-bold">${totalWeeklySales}</p>
+    <>
+      {/* Store selector */}
+      <div className="mb-6 flex items-center gap-3">
+        <label className="font-medium">Select Store:</label>
+        <select
+          value={selectedStore}
+          onChange={(e) => setSelectedStore(e.target.value)}
+          className="px-2 py-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        >
+          {storeList.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
+        </select>
       </div>
-      <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
-        <p className="text-gray-500 dark:text-gray-300">Top Performing Store</p>
-        <p className="text-2xl font-bold">{topStore}</p>
+
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
+          <p className="text-gray-500 dark:text-gray-300">Total Weekly Sales</p>
+          <p className="text-2xl font-bold">{totalWeeklySales}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
+          <p className="text-gray-500 dark:text-gray-300">Daily Average</p>
+          <p className="text-2xl font-bold">{dailyAvg}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
+          <p className="text-gray-500 dark:text-gray-300">
+            Best Category (Selected Store)
+          </p>
+          <p className="text-2xl font-bold">{topStoreCategory}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
+          <p className="text-gray-500 dark:text-gray-300">
+            Best Day (Selected Store)
+          </p>
+          <p className="text-2xl font-bold">{bestDay}</p>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg col-span-full">
+          <p className="text-gray-500 dark:text-gray-300">
+            Best Performing Store This Week
+          </p>
+          <p className="text-2xl font-bold">{topStore}</p>
+          <p className="text-gray-500 dark:text-gray-300 mt-1">
+            Top Product: <span className="font-bold">{topProduct}</span>
+          </p>
+          <p className="text-gray-500 dark:text-gray-300">
+            Best Day: <span className="font-bold">{bestStoreDay}</span>
+          </p>
+        </div>
       </div>
-      <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
-        <p className="text-gray-500 dark:text-gray-300">Best Category</p>
-        <p className="text-2xl font-bold">{bestCategory}</p>
-      </div>
-      <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg">
-        <p className="text-gray-500 dark:text-gray-300">Average Daily Sales</p>
-        <p className="text-2xl font-bold">${dailyAverage}</p>
-      </div>
-    </div>
+    </>
   );
 }

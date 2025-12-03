@@ -91,8 +91,6 @@ export default function Stocks() {
         darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
       }`}
     >
-      <h1 className="text-3xl font-bold mb-6">Stock Levels</h1>
-
       {/* Toggle */}
       <div className="mb-4">
         <button

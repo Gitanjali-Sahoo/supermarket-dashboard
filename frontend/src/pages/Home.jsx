@@ -1,8 +1,6 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../context/GlobalContext";
-import Stocks from "../components/Stocks";
-import SalesKPIs from "../components/SalesKpi";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,15 +13,16 @@ export default function Home() {
         {/* Hero Section */}
         <section className="text-center px-6 py-16 min-h-[60vh] flex flex-col justify-center items-center">
           {user && (
-            <h3 className="py-2 font-bold text-xl">Hi, {user.name} Welcome</h3>
+            <h3 className="py-2 font-bold text-xl">Welcome, {user.name} </h3>
           )}
           <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
             Sales Insights for Södertälje Supermarkets
           </h2>
 
           <p className="max-w-2xl mx-auto text-lg mb-6">
-            Track daily & weekly sales analytics across ICA, Lidl, Willys, and
-            Coop. Get real-time stock updates and monitor performance.
+            Track daily and weekly sales analytics across ICA, Lidl, Willys, and
+            Coop. Get real-time stock updates and monitor performance. Sign in
+            to gain insight.
           </p>
 
           {!user && (
@@ -63,8 +62,6 @@ export default function Home() {
             <p>Admins and staff have different permissions and dashboards.</p>
           </div>
         </section>
-        <Stocks />
-        <SalesKPIs />
       </main>
     </div>
   );

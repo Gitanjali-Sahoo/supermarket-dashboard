@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GlobalContext } from "../context/GlobalContext";
 import { ThemeContext } from "../context/ThemeContext";
@@ -14,17 +14,19 @@ export default function Navbar() {
     logout();
     navigate("/");
   };
-
+  useEffect(() => {
+    setProfileOpen(false); // close dropdown whenever user changes
+  }, [user]);
   return (
     <nav className="w-full shadow-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ">
-      <div className=" mx-auto px-6 py-3  flex justify-between items-center">
+      <div className=" mx-auto px-6 py-6  flex justify-between items-center">
         {/* LOGO */}
-        <Link to="/" className="text-2xl font-bold tracking-wide">
+        <Link to="/" className="text-3xl font-bold tracking-wide">
           SuperMarket
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6 text-sm">
+        <div className="hidden md:flex items-center gap-6 text-lg">
           <Link to="/about" className="hover:text-blue-500 transition">
             About
           </Link>
@@ -184,12 +186,22 @@ export default function Navbar() {
           )}
 
           {user ? (
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-3 py-2 bg-red-500 text-white rounded-lg"
-            >
-              Logout
-            </button>
+            <>
+              {" "}
+              <Link
+                className="block text-sm"
+                onClick={() => setOpen(false)}
+                to="/profile"
+              >
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-3 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <Link
